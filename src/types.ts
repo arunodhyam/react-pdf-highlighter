@@ -3,6 +3,8 @@ export interface LTWH {
   top: number;
   width: number;
   height: number;
+  viewportwidth: number;
+  viewportheight: number;
 }
 
 export interface LTWHP extends LTWH {

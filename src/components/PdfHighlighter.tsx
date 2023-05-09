@@ -6,12 +6,10 @@ import {
   EventBus,
   PDFViewer,
   PDFLinkService,
-  NullL10n,
 } from "pdfjs-dist/legacy/web/pdf_viewer";
 
 import "pdfjs-dist/web/pdf_viewer.css";
 import "../style/pdf_viewer.css";
-
 import "../style/PdfHighlighter.css";
 
 import getBoundingRect from "../lib/get-bounding-rect";
@@ -76,7 +74,8 @@ interface Props<T_HT> {
   ) => JSX.Element;
   highlights: Array<T_HT>;
   onScrollChange: () => void;
-  scrollRef: (scrollTo: (highlight: T_HT) => void) => void;
+  onPageNo: (e:any) => void;
+  scrollRef: (scrollTo: (highlight: IHighlight) => void) => void;
   pdfDocument: PDFDocumentProxy;
   pdfScaleValue: string;
   onSelectionFinished: (
@@ -119,7 +118,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
   resizeObserver: ResizeObserver | null = null;
   containerNode?: HTMLDivElement | null = null;
-  unsubscribe = () => {};
+  unsubscribe = () => { };
 
   constructor(props: Props<T_HT>) {
     super(props);
@@ -182,7 +181,8 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         textLayerMode: 2,
         removePageBorders: true,
         linkService: this.linkService,
-        l10n: NullL10n,
+        renderer: "canvas",
+        l10n: null,
       });
 
     this.linkService.setDocument(pdfDocument);
@@ -432,7 +432,13 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     this.renderHighlights();
   };
 
-  scrollTo = (highlight: T_HT) => {
+  scrollToPage = (pageNumber: number) => {
+    this.viewer.scrollPageIntoView({
+      pageNumber
+    });
+  }
+
+  scrollTo = (highlight: IHighlight) => {
     const { pageNumber, boundingRect, usePdfCoordinates } = highlight.position;
 
     this.viewer.container.removeEventListener("scroll", this.onScroll);
@@ -449,7 +455,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         ...pageViewport.convertToPdfPoint(
           0,
           scaledToViewport(boundingRect, pageViewport, usePdfCoordinates).top -
-            scrollMargin
+          scrollMargin
         ),
         0,
       ],
@@ -469,11 +475,12 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   };
 
   onDocumentReady = () => {
+    this.viewer.container.addEventListener("scroll", this.onScroll);
     const { scrollRef } = this.props;
 
     this.handleScaleValue();
 
-    scrollRef(this.scrollTo);
+    scrollRef(this.scrollTo, this.scrollToPage);
   };
 
   onSelectionChange = () => {
@@ -508,10 +515,12 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   };
 
   onScroll = () => {
+    console.log("Pages1>>",this.viewer._currentPageNumber)
     const { onScrollChange } = this.props;
-
+    const { onPageNo } = this.props;
     onScrollChange();
-
+    console.log("current page ", this.viewer._currentPageNumber)
+    onPageNo(this.viewer._currentPageNumber);
     this.setState(
       {
         scrolledToHighlightId: EMPTY_ID,
@@ -519,7 +528,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       () => this.renderHighlights()
     );
 
-    this.viewer.container.removeEventListener("scroll", this.onScroll);
+    // this.viewer.container.removeEventListener("scroll", this.onScroll);
   };
 
   onMouseDown: PointerEventHandler = (event) => {

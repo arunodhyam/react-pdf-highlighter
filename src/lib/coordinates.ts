@@ -30,6 +30,7 @@ export const viewportToScaled = (
 };
 
 const pdfToViewport = (pdf: Scaled, viewport: Viewport): LTWHP => {
+  const { width, height } = viewport;
   const [x1, y1, x2, y2] = viewport.convertToViewportRectangle([
     pdf.x1,
     pdf.y1,
@@ -43,6 +44,9 @@ const pdfToViewport = (pdf: Scaled, viewport: Viewport): LTWHP => {
 
     width: x2 - x1,
     height: y1 - y2,
+
+    viewportwidth: width,
+    viewportheight: height,
 
     pageNumber: pdf.pageNumber,
   };
@@ -74,6 +78,8 @@ export const scaledToViewport = (
     top: y1,
     width: x2 - x1,
     height: y2 - y1,
+    viewportwidth: width,
+    viewportheight: height,
     pageNumber: scaled.pageNumber,
   };
 };

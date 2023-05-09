@@ -6,11 +6,14 @@ interface State {
   compact: boolean;
   text: string;
   emoji: string;
+  field: string;
 }
 
 interface Props {
   onConfirm: (comment: { text: string; emoji: string }) => void;
   onOpen: () => void;
+  fields: any;
+  docType: string;
   onUpdate?: () => void;
 }
 
@@ -19,6 +22,7 @@ export class Tip extends Component<Props, State> {
     compact: true,
     text: "",
     emoji: "",
+    field: "",
   };
 
   // for TipContainer
@@ -31,8 +35,10 @@ export class Tip extends Component<Props, State> {
   }
 
   render() {
-    const { onConfirm, onOpen } = this.props;
+    const { onConfirm, onOpen, docType } = this.props;
     const { compact, text, emoji } = this.state;
+    const { fields } = this.props;
+    console.log("Fields in Tip", fields);
 
     return (
       <div className="Tip">
@@ -44,7 +50,7 @@ export class Tip extends Component<Props, State> {
               this.setState({ compact: false });
             }}
           >
-            Add highlight
+            Add Field
           </div>
         ) : (
           <form
@@ -55,8 +61,37 @@ export class Tip extends Component<Props, State> {
             }}
           >
             <div>
+
+              <label htmlFor="fname" style={{ color: '#020261' }}>
+                Choose The Field_Name: <br />
+                <select name="fname" onChange={(e) =>
+                  this.setState({ text: e.target.value })
+                }>
+                  {fields.data &&
+                    fields.data.fields.edges.length > 0 ?
+                    fields.data.fields.edges
+                      .map((field: any) => {
+                        return (<option value={field.node?.fieldName}>{field.node?.fieldName}</option>)
+                      }) : <option style={{ color: 'black' }}>Classification file is not available for this {docType}</option>
+                  }
+                </select>
+              </label>
+            </div><br />
+            {/* <div>
+              <label htmlFor="fname" style={{ color: '#020261' }}>
+                Choose The Field_Name:
+                <select name="fname" onChange={(e) =>
+                  this.setState({ text: e.target.value })
+                }>
+                  {[{ "name": "Title" }, { "name": "Date" }, { "name": "Parties" }, { "name": "Venue" }, { "name": "Governing Law" }, { "name": "Indemnity" }, { "name": "Termination" }].map((_field) => (
+                    <option value={_field.name}>{_field.name}</option>
+                  ))}
+                </select>
+              </label>
+            </div><br /> */}
+            <div>
               <textarea
-                placeholder="Your comment"
+                placeholder="Add new field_name"
                 autoFocus
                 value={text}
                 onChange={(event) =>
@@ -68,22 +103,23 @@ export class Tip extends Component<Props, State> {
                   }
                 }}
               />
-              <div>
-                {["💩", "😱", "😍", "🔥", "😳", "⚠️"].map((_emoji) => (
-                  <label key={_emoji}>
+              {/* <div>
+                {[{ "img": "📌" }].map((_emoji) => (
+                  <label key={_emoji.img}>
                     <input
-                      checked={emoji === _emoji}
+                      checked={emoji === _emoji.img}
                       type="radio"
                       name="emoji"
-                      value={_emoji}
+                      style={{ opacity: 1, position: 'relative' }}
+                      value={_emoji.img}
                       onChange={(event) =>
                         this.setState({ emoji: event.target.value })
                       }
                     />
-                    {_emoji}
+                    {_emoji.img}
                   </label>
                 ))}
-              </div>
+              </div> */}
             </div>
             <div>
               <input type="submit" value="Save" />

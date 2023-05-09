@@ -12,11 +12,13 @@ interface Props {
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
+  highlight: [];
   comment: {
     emoji: string;
     text: string;
   };
   isScrolledTo: boolean;
+  scrollToView: () => void;
 }
 
 export class Highlight extends Component<Props> {
@@ -26,27 +28,62 @@ export class Highlight extends Component<Props> {
       onClick,
       onMouseOver,
       onMouseOut,
+      highlight,
       comment,
       isScrolledTo,
+      scrollToView,
     } = this.props;
 
     const { rects, boundingRect } = position;
+
+    function getIndex(text: any) {
+      const value = highlight.findIndex((obj: any) => obj.comment.text === text);
+      return value
+    }
+    const index = getIndex(comment.text)
+    console.log("Index", index);
+
+    const updateHash = (text: any) => {
+      console.log("UpdateHash Text", text)
+      const Comment: any[] = highlight.filter((obj: any) => obj.comment.text === text);
+      console.log("Comment", Comment)
+      let id = Comment[0].id
+      console.log("Comment_id", Comment[0].id)
+      document.location.hash = `highlight-${id}`;
+
+    };
 
     return (
       <div
         className={`Highlight ${isScrolledTo ? "Highlight--scrolledTo" : ""}`}
       >
-        {comment ? (
+        {/* {comment && (index % 2 == 0) ? (
           <div
             className="Highlight__emoji"
             style={{
-              left: 20,
+              left: boundingRect.viewportwidth - (0.1 * boundingRect.viewportwidth),
               top: boundingRect.top,
             }}
           >
-            {comment.emoji}
+            <tr>
+              <div className="Highlight__e">{comment.emoji}</div>
+              <td className="Highlight__b" onClick={() => {
+              }}><b>{comment.text}</b></td>
+            </tr>
           </div>
-        ) : null}
+        ) : <div
+          className="Highlight__emoji"
+          style={{
+            left: boundingRect.viewportwidth - (0.1 * boundingRect.viewportwidth),
+            top: boundingRect.top,
+          }}
+        >
+          <tr>
+            <td className="Highlight__b" onClick={() => {
+            }}><b>{comment.text}</b></td>
+            <div className="Highlight__e">{comment.emoji}</div>
+          </tr>
+        </div>} */}
         <div className="Highlight__parts">
           {rects.map((rect, index) => (
             <div
